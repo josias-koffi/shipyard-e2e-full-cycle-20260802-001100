@@ -1,0 +1,8 @@
+{
+  "name": "shipyard-t45-pages",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test" },
+  "dependencies": { "status-widget": "file:vendor/status-widget" }
+}

@@ -1,0 +1,41 @@
+# Promote — keep a single "release train" PR from develop → main.
+#
+# On every push to develop (i.e. after the delivery loop merges a feature), this makes
+# sure there is exactly one open PR promoting develop into main. Merging THAT PR is your
+# manual release gate: it advances main, which triggers release-please (version +
+# CHANGELOG + tag) and, on a new release, the staging deploy. Nothing here auto-merges.
+name: promote
+
+on:
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  promote-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure a develop → main promotion PR exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Compare via the API (no checkout needed, no dependency on local refs).
+          ahead="$(gh api "repos/$REPO/compare/main...develop" --jq '.ahead_by' 2>/dev/null || echo 0)"
+          if [ "${ahead:-0}" -eq 0 ]; then
+            echo "develop has nothing new for main — no promotion PR needed."
+            exit 0
+          fi
+          existing="$(gh pr list --repo "$REPO" --base main --head develop --state open \
+            --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            echo "promotion PR #$existing already open — it already includes this push."
+            exit 0
+          fi
+          gh pr create --repo "$REPO" --base main --head develop \
+            --title "chore(release): promote develop → main" \
+            --body "Automated release train. Merging this promotes the accumulated, CI-green work on \`develop\` to \`main\`, which triggers Release Please (version + CHANGELOG + tag) and the staging deploy. Review the diff and merge when you want to cut a release."
