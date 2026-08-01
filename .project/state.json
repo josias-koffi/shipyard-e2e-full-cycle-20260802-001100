@@ -1,0 +1,15 @@
+{
+  "current_sprint": 1,
+  "stack_profile": {
+    "languages": ["JavaScript", "HTML"],
+    "package_manager": "npm",
+    "commands": { "test": "node --test" },
+    "notes": "Static GitHub Pages fixture; do not add frameworks or external dependencies."
+  },
+  "loop": {
+    "status": "idle", "current_iteration": null, "current_issue": null,
+    "attempts": {}, "paused_reason": null, "resume_after": null,
+    "board_id": null, "max_review_rounds": 2, "max_attempts_per_issue": 2,
+    "max_iterations_per_sprint": 1, "escalated_issues": [], "blockers": []
+  }
+}
